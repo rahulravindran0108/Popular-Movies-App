@@ -8,6 +8,7 @@ import example.rahul_ravindran.com.popularmovies.api.APIModule;
 import example.rahul_ravindran.com.popularmovies.api.DataProviderModule;
 import example.rahul_ravindran.com.popularmovies.component.DataProviderComponent;
 import example.rahul_ravindran.com.popularmovies.component.DaggerDataProviderComponent;
+import timber.log.Timber;
 
 /**
  * Created by rahulravindran on 25/12/15.
@@ -19,6 +20,8 @@ public class PopularMoviesApp extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        Timber.plant(new Timber.DebugTree());
+
         initializeInjector();
     }
 

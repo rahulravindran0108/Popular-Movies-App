@@ -15,7 +15,7 @@ import java.util.List;
 public class MovieReview implements Parcelable {
 
     @Expose
-    long id;
+    String id;
 
     @Expose
     String author;
@@ -23,11 +23,23 @@ public class MovieReview implements Parcelable {
     @Expose
     String content;
 
-    public long getId() {
+    @Expose
+    String url;
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+
+    public String getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -63,10 +75,10 @@ public class MovieReview implements Parcelable {
         public int totalResults;
 
         @Expose @SerializedName("results")
-        public List<MovieReview> reviews = new ArrayList<>();
+        public List<MovieReview> reviews;
     }
     protected MovieReview(Parcel in) {
-        this.id = in.readLong();
+        this.id = in.readString();
         this.author = in.readString();
         this.content = in.readString();
     }
@@ -90,7 +102,7 @@ public class MovieReview implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeLong(this.id);
+        dest.writeString(this.id);
         dest.writeString(this.author);
         dest.writeString(this.content);
     }

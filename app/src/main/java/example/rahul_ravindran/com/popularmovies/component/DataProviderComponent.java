@@ -4,6 +4,7 @@ import javax.inject.Singleton;
 
 import dagger.Component;
 import example.rahul_ravindran.com.popularmovies.MainActivity;
+import example.rahul_ravindran.com.popularmovies.MovieDetailActivity;
 import example.rahul_ravindran.com.popularmovies.api.APIModule;
 import example.rahul_ravindran.com.popularmovies.api.DataProviderModule;
 
@@ -14,4 +15,5 @@ import example.rahul_ravindran.com.popularmovies.api.DataProviderModule;
 @Component(modules={APIModule.class, DataProviderModule.class})
 public interface DataProviderComponent {
     void inject(MainActivity activity);
+    void inject(MovieDetailActivity activity);
 }

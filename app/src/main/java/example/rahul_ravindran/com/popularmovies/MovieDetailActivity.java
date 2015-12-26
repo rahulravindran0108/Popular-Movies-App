@@ -26,8 +26,11 @@ import com.google.common.collect.Lists;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.logging.HttpLoggingInterceptor;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.Transformation;
 
 import java.util.List;
+
+import javax.inject.Inject;
 
 import butterknife.Bind;
 import butterknife.BindColor;
@@ -36,7 +39,9 @@ import example.rahul_ravindran.com.popularmovies.adapters.GridViewImageAdapter;
 import example.rahul_ravindran.com.popularmovies.api.MoviesAPI;
 import example.rahul_ravindran.com.popularmovies.model.MovieReview;
 import example.rahul_ravindran.com.popularmovies.repositories.MoviesRepoImpl;
+import example.rahul_ravindran.com.popularmovies.ui.CircleTransform;
 import example.rahul_ravindran.com.popularmovies.ui.ResizableImageView;
+import example.rahul_ravindran.com.popularmovies.ui.RoundedTransformation;
 import retrofit.Call;
 import retrofit.Callback;
 import retrofit.GsonConverterFactory;
@@ -47,6 +52,8 @@ import rx.functions.Action1;
 import rx.subscriptions.CompositeSubscription;
 import timber.log.Timber;
 
+import static butterknife.ButterKnife.findById;
+
 /**
  * Created by rahulravindran on 16/12/15.
  */
@@ -55,19 +62,30 @@ import timber.log.Timber;
 public class MovieDetailActivity extends AppCompatActivity implements ObservableScrollViewCallbacks {
 
     ObservableScrollView mScrollView;
-    @Bind(R.id.movie_cover_container) FrameLayout mCoverContainer;
-    @Bind(R.id.toolbar) Toolbar mToolbar;
-    @Bind(R.id.movie_cover) ResizableImageView coverImageView;
-    @Bind(R.id.movie_poster) ResizableImageView moviePosterImageView;
-    @Bind(R.id.movie_title) TextView movieTitle;
-    @Bind(R.id.movie_release_date) TextView movieReleaseDate;
-    @Bind(R.id.movie_average_rating) TextView movieAverageRating;
-    @Bind(R.id.movie_overview) TextView movieOverview;
-    @Bind(R.id.ratingBars) RatingBar movieRatingBar;
-    @Bind(R.id.movie_reviews_container) ViewGroup mReviewsGroup;
-    @BindColor(R.color.theme_primary) int mColorThemePrimary;
-    @BindColor(R.color.body_text_white) int mColorTextWhite;
-
+    @Bind(R.id.movie_cover_container)
+    FrameLayout mCoverContainer;
+    @Bind(R.id.toolbar)
+    Toolbar mToolbar;
+    @Bind(R.id.movie_cover)
+    ResizableImageView coverImageView;
+    @Bind(R.id.movie_poster)
+    ResizableImageView moviePosterImageView;
+    @Bind(R.id.movie_title)
+    TextView movieTitle;
+    @Bind(R.id.movie_release_date)
+    TextView movieReleaseDate;
+    @Bind(R.id.movie_average_rating)
+    TextView movieAverageRating;
+    @Bind(R.id.movie_overview)
+    TextView movieOverview;
+    @Bind(R.id.ratingBars)
+    RatingBar movieRatingBar;
+    @Bind(R.id.movie_reviews_container)
+    ViewGroup mReviewsGroup;
+    @BindColor(R.color.theme_primary)
+    int mColorThemePrimary;
+    @BindColor(R.color.body_text_white)
+    int mColorTextWhite;
 
 
     private String baseImageUrl = "http://image.tmdb.org/t/p/w342/";
@@ -76,6 +94,10 @@ public class MovieDetailActivity extends AppCompatActivity implements Observable
     private MovieDB mMovie;
     private List<MovieReview> mReviews;
 
+
+    @Inject
+    MoviesAPI mApiService;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -83,20 +105,13 @@ public class MovieDetailActivity extends AppCompatActivity implements Observable
         super.onCreate(savedInstanceState);
         setContentView(R.layout.movie_detail);
         ButterKnife.bind(this);
+        ((PopularMoviesApp) getApplication()).getDataProviderComponent().inject(this);
 
         setSupportActionBar(mToolbar);
 
         mSubscriptions = new CompositeSubscription();
-        OkHttpClient client = new OkHttpClient();
-        final Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(BuildConfig.BASE_URL)
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
-                .build();
 
-        MoviesAPI apiService = retrofit.create(MoviesAPI.class);
-        mMoviesRepository = new MoviesRepoImpl(apiService);
+        mMoviesRepository = new MoviesRepoImpl(mApiService);
 
 
         if (mToolbar != null) {
@@ -128,33 +143,45 @@ public class MovieDetailActivity extends AppCompatActivity implements Observable
         Picasso.with(this).load(baseImageUrl +
                 mMovie.getBackdropPath()).into(coverImageView);
 
+
         Picasso.with(this).load(baseImageUrl +
-                mMovie.getBackdropPath()).fit().into(moviePosterImageView);
+                mMovie.getBackdropPath()).transform(new CircleTransform()).
+                into(moviePosterImageView);
 
         movieTitle.setText(mMovie.getTitle());
-        movieReleaseDate.setText("Release Date:"+mMovie.getReleaseDate());
-        movieAverageRating.setText("Average Rating:"+Double.toString(mMovie.getVoteAverage()));
+        movieReleaseDate.setText("Release Date:" + mMovie.getReleaseDate());
+        movieAverageRating.setText("Average Rating:" + Double.toString(mMovie.getVoteAverage()));
         movieOverview.setText(mMovie.getOverview());
         movieRatingBar.setNumStars(10);
         movieRatingBar.setRating((float) mMovie.getVoteAverage());
+
+
+        loadReviews();
 
     }
 
     private void loadReviews() {
         mSubscriptions.add(mMoviesRepository.getMovieReview(mMovie.getId())
-        .subscribe(new Action1<List<MovieReview>>() {
-            @Override
-            public void call(List<MovieReview> reviews) {
-                Timber.d(String.format("Reviews loaded, %d items.", reviews.size()));
-                onReviewsLoaded(reviews);
-            }
-        }, new Action1<Throwable>() {
-            @Override
-            public void call(Throwable throwable) {
-                Timber.e(throwable, "Reviews loading failed.");
-                onReviewsLoaded(null);
-            }
-        }));
+                .subscribe(new Action1<List<MovieReview>>() {
+                    @Override
+                    public void call(List<MovieReview> reviews) {
+                        final List<MovieReview> newReviews = reviews;
+                        Timber.d(String.format("Reviews loaded, %d items.", reviews.size()));
+                        MovieDetailActivity.this.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                onReviewsLoaded(newReviews);
+                            }
+                        });
+
+                    }
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Timber.e(throwable, "Reviews loading failed.");
+                        //onReviewsLoaded(null);
+                    }
+                }));
     }
 
     private void onReviewsLoaded(List<MovieReview> reviews) {
@@ -167,6 +194,7 @@ public class MovieDetailActivity extends AppCompatActivity implements Observable
         final LayoutInflater inflater = LayoutInflater.from(MovieDetailActivity.this);
         boolean hasReviews = false;
 
+
         if (!reviews.isEmpty()) {
             for (MovieReview review : reviews) {
                 if (TextUtils.isEmpty(review.getAuthor())) {
@@ -174,22 +202,21 @@ public class MovieDetailActivity extends AppCompatActivity implements Observable
                 }
 
                 final View reviewView = inflater.inflate(R.layout.movie_review_detail, mReviewsGroup, false);
-                final TextView reviewAuthorView = (TextView) reviewView.findViewById(R.id.review_author);
-                final TextView reviewContentView = (TextView) reviewView.findViewById(R.id.review_content);
+                final TextView reviewAuthorView =  findById(reviewView,R.id.review_author);
+                final TextView reviewContentView =  findById(reviewView,R.id.review_content);
 
                 reviewAuthorView.setText(review.getAuthor());
                 reviewContentView.setText(review.getContent());
 
                 mReviewsGroup.addView(reviewView);
                 hasReviews = true;
+
+
             }
         }
 
         mReviewsGroup.setVisibility(hasReviews ? View.VISIBLE : View.GONE);
     }
-
-
-
 
     @Override
     public void onScrollChanged(int scrollY, boolean firstScroll, boolean dragging) {

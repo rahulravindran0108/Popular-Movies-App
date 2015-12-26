@@ -29,12 +29,15 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
 import example.rahul_ravindran.com.popularmovies.adapters.MoviesAdapter;
 import example.rahul_ravindran.com.popularmovies.api.DataProviderModule;
 import example.rahul_ravindran.com.popularmovies.api.MoviesAPI;
 import example.rahul_ravindran.com.popularmovies.api.Sort;
 import example.rahul_ravindran.com.popularmovies.listeners.EndlessScrollListener;
 import example.rahul_ravindran.com.popularmovies.repositories.MoviesRepoImpl;
+import example.rahul_ravindran.com.popularmovies.ui.CustomViewAnimator;
 import retrofit.GsonConverterFactory;
 import retrofit.Retrofit;
 import retrofit.RxJavaCallAdapterFactory;
@@ -56,12 +59,12 @@ public class MainActivity extends AppCompatActivity implements EndlessScrollList
     int firstVisibleItem, visibleItemCount, totalItemCount;
     protected MoviesAdapter newAdapter;
     protected int mSelectedPosition = -1;
-    protected RecyclerView movieList;
+
     private Sort mSort;
     private BehaviorSubject<Observable<List<MovieDB>>> mItemsObservableSubject = BehaviorSubject.create();
     private MoviesRepoImpl mMoviesRepository;
     private static final int VISIBLE_THRESHOLD = 10;
-    private int mCurrentPage = 1;
+    private int mCurrentPage = 0;
     private CompositeSubscription mSubscriptions;
     private EndlessScrollListener mEndlessScrollListener;
     private ModeSpinnerAdapter mSpinnerAdapter = new ModeSpinnerAdapter();
@@ -71,6 +74,13 @@ public class MainActivity extends AppCompatActivity implements EndlessScrollList
     @Inject
     MoviesAPI apiService;
 
+    @Bind(R.id.movies_recycler_view) RecyclerView movieList;
+    @Bind(R.id.movies_animator)
+    CustomViewAnimator mViewAnimator;
+
+    protected static final int ANIMATOR_VIEW_LOADING = R.id.view_loading;
+    protected static final int ANIMATOR_VIEW_CONTENT = R.id.movies_recycler_view;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -79,13 +89,14 @@ public class MainActivity extends AppCompatActivity implements EndlessScrollList
 
         setContentView(R.layout.activity_main);
         ((PopularMoviesApp) getApplication()).getDataProviderComponent().inject(this);
+        ButterKnife.bind(this);
 
         mSubscriptions = new CompositeSubscription();
         mSort = Sort.fromString(Sort.popularity.toString());
         toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        movieList = (RecyclerView) findViewById(R.id.movies_recycler_view);
+
         List<MovieDB> movieDBList = new ArrayList<>();
 
         mMoviesRepository = new MoviesRepoImpl(apiService);
@@ -96,6 +107,9 @@ public class MainActivity extends AppCompatActivity implements EndlessScrollList
         newAdapter.setListener(this);
 
         newAdapter.setLoadMore(true);
+
+        //set loading screen
+        mViewAnimator.setDisplayedChildId((mCurrentPage == 0) ? ANIMATOR_VIEW_LOADING : ANIMATOR_VIEW_CONTENT);
         subscribeToMovies();
         initRecyclerView();
         initModeSpinner();
@@ -128,7 +142,7 @@ public class MainActivity extends AppCompatActivity implements EndlessScrollList
 
                         newAdapter.setLoadMore(!movies.isEmpty());
                         newAdapter.add(movies);
-                        //mViewAnimator.setDisplayedChildId(ANIMATOR_VIEW_CONTENT);
+                        mViewAnimator.setDisplayedChildId(ANIMATOR_VIEW_CONTENT);
                     }
                 }, new Action1<Throwable>() {
                     @Override
