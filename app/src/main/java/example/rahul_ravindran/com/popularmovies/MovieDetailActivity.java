@@ -6,6 +6,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -28,6 +29,8 @@ import com.squareup.okhttp.logging.HttpLoggingInterceptor;
 import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Transformation;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -37,6 +40,7 @@ import butterknife.BindColor;
 import butterknife.ButterKnife;
 import example.rahul_ravindran.com.popularmovies.adapters.GridViewImageAdapter;
 import example.rahul_ravindran.com.popularmovies.api.MoviesAPI;
+import example.rahul_ravindran.com.popularmovies.model.Genres;
 import example.rahul_ravindran.com.popularmovies.model.MovieReview;
 import example.rahul_ravindran.com.popularmovies.repositories.MoviesRepoImpl;
 import example.rahul_ravindran.com.popularmovies.ui.CircleTransform;
@@ -61,6 +65,7 @@ import static butterknife.ButterKnife.findById;
 
 public class MovieDetailActivity extends AppCompatActivity implements ObservableScrollViewCallbacks {
 
+    @Bind(R.id.movie_scroll_view)
     ObservableScrollView mScrollView;
     @Bind(R.id.movie_cover_container)
     FrameLayout mCoverContainer;
@@ -86,6 +91,8 @@ public class MovieDetailActivity extends AppCompatActivity implements Observable
     int mColorThemePrimary;
     @BindColor(R.color.body_text_white)
     int mColorTextWhite;
+    @Bind(R.id.movie_genre)
+    TextView mMovieGenres;
 
 
     private String baseImageUrl = "http://image.tmdb.org/t/p/w342/";
@@ -93,6 +100,8 @@ public class MovieDetailActivity extends AppCompatActivity implements Observable
     private MoviesRepoImpl mMoviesRepository;
     private MovieDB mMovie;
     private List<MovieReview> mReviews;
+
+    private List<Genres> mGenres;
 
 
     @Inject
@@ -133,7 +142,6 @@ public class MovieDetailActivity extends AppCompatActivity implements Observable
                 ab.setDisplayShowHomeEnabled(true);
             }
         }
-        mScrollView = (ObservableScrollView) findViewById(R.id.movie_scroll_view);
 
         mScrollView.setScrollViewCallbacks(this);
 
@@ -157,9 +165,39 @@ public class MovieDetailActivity extends AppCompatActivity implements Observable
 
 
         loadReviews();
+        loadGenres();
 
     }
 
+    //loading genres
+    private void loadGenres() {
+        mSubscriptions.add(mMoviesRepository.getListOfGenres()
+                        .subscribe(
+                                new Action1<List<Genres>>() {
+                                    @Override
+                                    public void call(List<Genres> genres) {
+                                        final List<Genres> newGenres = genres;
+                                        Timber.d(String.format("Genres loaded, %d items.", genres.size()));
+                                        MovieDetailActivity.this.runOnUiThread(new Runnable() {
+                                            @Override
+                                            public void run() {
+                                                onGenresLoaded(newGenres);
+                                            }
+                                        });
+
+                                    }
+                                }, new Action1<Throwable>() {
+                                    @Override
+                                    public void call(Throwable throwable) {
+                                        Timber.e(throwable, "Genres loading failed.");
+                                        //onReviewsLoaded(null);
+                                    }
+                                }
+                        )
+                    );
+    }
+
+    //loading reviews
     private void loadReviews() {
         mSubscriptions.add(mMoviesRepository.getMovieReview(mMovie.getId())
                 .subscribe(new Action1<List<MovieReview>>() {
@@ -182,6 +220,19 @@ public class MovieDetailActivity extends AppCompatActivity implements Observable
                         //onReviewsLoaded(null);
                     }
                 }));
+    }
+
+    private void onGenresLoaded(List<Genres> genres) {
+        mGenres = genres;
+        List<Integer> movieGenreID = mMovie.getGenreIds();
+        List<String> outputString = new ArrayList<String>();
+
+        for(Genres genre : genres) {
+            if(movieGenreID.contains((int) genre.getId()))
+                outputString.add(genre.getName());
+        }
+
+        mMovieGenres.setText(Arrays.toString(outputString.toArray()));
     }
 
     private void onReviewsLoaded(List<MovieReview> reviews) {
