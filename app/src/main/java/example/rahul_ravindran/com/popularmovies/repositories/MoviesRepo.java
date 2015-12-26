@@ -4,6 +4,7 @@ import java.util.List;
 
 import example.rahul_ravindran.com.popularmovies.MovieDB;
 import example.rahul_ravindran.com.popularmovies.api.Sort;
+import example.rahul_ravindran.com.popularmovies.model.Genres;
 import example.rahul_ravindran.com.popularmovies.model.MovieReview;
 import rx.Observable;
 
@@ -15,4 +16,6 @@ public interface MoviesRepo {
     Observable<List<MovieDB>> discoverMovies(Sort sort, int page);
 
     Observable<List<MovieReview>> getMovieReview(long id);
+
+    Observable<List<Genres>> getListOfGenres();
 }
