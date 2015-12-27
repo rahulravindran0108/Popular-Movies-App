@@ -6,6 +6,7 @@ import java.util.List;
 
 import example.rahul_ravindran.com.popularmovies.model.Genres;
 import example.rahul_ravindran.com.popularmovies.model.MovieReview;
+import example.rahul_ravindran.com.popularmovies.model.Video;
 import retrofit.Call;
 import retrofit.http.GET;
 import retrofit.http.Path;
@@ -43,4 +44,10 @@ public interface MoviesAPI {
     Observable<Genres.Response> getGenres(
             @Query("api_key") String api_key
     );
+
+    //get trailers
+    @GET("movie/{id}/videos") Observable<Video.Response> videos(
+            @Path("id") long movieId,
+            @Query("api_key") String api_key);
+
 }

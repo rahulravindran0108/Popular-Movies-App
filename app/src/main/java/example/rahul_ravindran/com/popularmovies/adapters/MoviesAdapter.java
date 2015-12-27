@@ -1,16 +1,22 @@
 package example.rahul_ravindran.com.popularmovies.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.BitmapDrawable;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.graphics.Palette;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AlphaAnimation;
+import android.view.animation.Animation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Callback;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -122,14 +128,28 @@ public class MoviesAdapter extends EndlessRecylcerView<MovieDB, MoviesAdapter.Mo
 //                mMovieId = movie.getId();
 //            }
             Picasso.with(mContext).load(baseImageUrl+movie.getPosterPath()
-            ).into(mImageView);
-//            Glide.with(mContext)
-//                    .load(movie.getPosterPath())
-//                    .crossFade()
-//                    .placeholder(R.color.movie_poster_placeholder)
-//                    .listener(GlidePalette.with(movie.getPosterPath())
-//                            .intoCallBack(palette -> applyColors(palette.getVibrantSwatch())))
-//                    .into(mImageView);
+            ).into(mImageView, new Callback.EmptyCallback() {
+
+//When the image is loaded, palette will take the color and apply it to the other imageView
+
+                @Override public void onSuccess() {
+                    final Bitmap bitmap = ((BitmapDrawable) mImageView.getDrawable()).getBitmap();// Ew!
+                    Palette.generateAsync(bitmap, new Palette.PaletteAsyncListener() {
+                        public void onGenerated(Palette palette) {
+
+                            if (palette != null) {
+
+                                Palette.Swatch vibrantSwatch = palette.getVibrantSwatch();
+
+                                if (vibrantSwatch != null) {
+                                    applyColors(vibrantSwatch);
+
+                                }
+                            }
+                        }
+                    });
+                }
+            });
         }
 
         private void resetColors() {

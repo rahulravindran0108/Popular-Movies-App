@@ -11,6 +11,7 @@ import example.rahul_ravindran.com.popularmovies.api.MoviesAPI;
 import example.rahul_ravindran.com.popularmovies.api.Sort;
 import example.rahul_ravindran.com.popularmovies.model.Genres;
 import example.rahul_ravindran.com.popularmovies.model.MovieReview;
+import example.rahul_ravindran.com.popularmovies.model.Video;
 import rx.Observable;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
@@ -64,6 +65,20 @@ public class MoviesRepoImpl implements MoviesRepo {
                     @Override
                     public List<Genres> call(Genres.Response response) {
                         return response.genres;
+                    }
+                })
+                .subscribeOn(Schedulers.io());
+    }
+
+    @Override
+    public Observable<List<Video>> videos(long movieId) {
+        return mMovieApi.videos(movieId,BuildConfig.API_KEY)
+                .timeout(2, TimeUnit.SECONDS)
+                .retry(2)
+                .map(new Func1<Video.Response, List<Video>>() {
+                    @Override
+                    public List<Video> call(Video.Response response) {
+                        return response.videos;
                     }
                 })
                 .subscribeOn(Schedulers.io());

@@ -1,10 +1,14 @@
 package example.rahul_ravindran.com.popularmovies.helpers;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 
 import example.rahul_ravindran.com.popularmovies.R;
+import example.rahul_ravindran.com.popularmovies.model.Video;
+import timber.log.Timber;
 
 /**
  * Created by rahulravindran on 26/12/15.
@@ -16,6 +20,17 @@ public class MovieHelpers {
 
     public MovieHelpers(Context c) {
         this.mContext = c;
+    }
+
+    public void playVideo(Video video) {
+        if (video.getSite().equals(Video.SITE_YOUTUBE)) {
+            Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse("http://www.youtube.com/watch?v=" + video.getKey()));
+            i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            mContext.startActivity(i);
+        }
+
+        else
+            Timber.w("Unsupported video format");
     }
 
     public Drawable providesDrawable(int id) {

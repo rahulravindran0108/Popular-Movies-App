@@ -6,6 +6,7 @@ import example.rahul_ravindran.com.popularmovies.MovieDB;
 import example.rahul_ravindran.com.popularmovies.api.Sort;
 import example.rahul_ravindran.com.popularmovies.model.Genres;
 import example.rahul_ravindran.com.popularmovies.model.MovieReview;
+import example.rahul_ravindran.com.popularmovies.model.Video;
 import rx.Observable;
 
 /**
@@ -18,4 +19,6 @@ public interface MoviesRepo {
     Observable<List<MovieReview>> getMovieReview(long id);
 
     Observable<List<Genres>> getListOfGenres();
+
+    Observable<List<Video>> videos(long movieId);
 }

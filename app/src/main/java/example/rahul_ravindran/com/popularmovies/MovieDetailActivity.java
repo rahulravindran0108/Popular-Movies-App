@@ -9,6 +9,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -43,6 +44,7 @@ import example.rahul_ravindran.com.popularmovies.api.MoviesAPI;
 import example.rahul_ravindran.com.popularmovies.helpers.MovieHelpers;
 import example.rahul_ravindran.com.popularmovies.model.Genres;
 import example.rahul_ravindran.com.popularmovies.model.MovieReview;
+import example.rahul_ravindran.com.popularmovies.model.Video;
 import example.rahul_ravindran.com.popularmovies.repositories.MoviesRepoImpl;
 import example.rahul_ravindran.com.popularmovies.ui.CircleTransform;
 import example.rahul_ravindran.com.popularmovies.ui.ResizableImageView;
@@ -88,8 +90,13 @@ public class MovieDetailActivity extends AppCompatActivity implements Observable
     RatingBar movieRatingBar;
     @Bind(R.id.movie_reviews_container)
     ViewGroup mReviewsGroup;
+    @Bind(R.id.movie_videos_container)
+    ViewGroup mVideosGroup;
     @Bind(R.id.movie_genres_container)
     ViewGroup mGenresGroup;
+    @Bind(R.id.movie_poster_play)
+    ImageView mPosterPlayImage;
+
     @BindColor(R.color.theme_primary)
     int mColorThemePrimary;
     @BindColor(R.color.body_text_white)
@@ -103,9 +110,12 @@ public class MovieDetailActivity extends AppCompatActivity implements Observable
     private MoviesRepoImpl mMoviesRepository;
     private MovieDB mMovie;
     private List<MovieReview> mReviews;
-
     private List<Genres> mGenres;
+    private List<Video> mVideos;
     private MovieHelpers mHelpers;
+    private Video mTrailer;
+    private List<Runnable> mDeferredUiOperations = new ArrayList<>();
+    private MenuItem mMenuItemShare;
 
 
     @Inject
@@ -170,6 +180,7 @@ public class MovieDetailActivity extends AppCompatActivity implements Observable
 
         loadReviews();
         loadGenres();
+        loadVideos();
 
     }
 
@@ -272,7 +283,7 @@ public class MovieDetailActivity extends AppCompatActivity implements Observable
                 }
 
                 final View reviewView = inflater.inflate(R.layout.movie_review_detail, mReviewsGroup, false);
-                final TextView reviewAuthorView =  findById(reviewView,R.id.review_author);
+                final TextView reviewAuthorView =  findById(reviewView, R.id.review_author);
                 final TextView reviewContentView =  findById(reviewView,R.id.review_content);
 
                 reviewAuthorView.setText(review.getAuthor());
@@ -286,6 +297,99 @@ public class MovieDetailActivity extends AppCompatActivity implements Observable
         }
 
         mReviewsGroup.setVisibility(hasReviews ? View.VISIBLE : View.GONE);
+    }
+
+    private void loadVideos() {
+        mSubscriptions.add(mMoviesRepository.videos(mMovie.getId()).subscribe(new Action1<List<Video>>() {
+            @Override
+            public void call(final List<Video> videos) {
+                Timber.d(String.format("Videos loaded, %d items.", videos.size()));
+                Timber.d("Videos: " + videos);
+                MovieDetailActivity.this.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        onVideosLoaded(videos);
+                    }
+                });
+
+            }
+        }, new Action1<Throwable>() {
+            @Override
+            public void call(Throwable throwable) {
+                Timber.e(throwable, "Videos loading failed.");
+                //onVideosLoaded(null);
+            }
+        }));
+    }
+
+    private void onVideosLoaded(List<Video> videos) {
+        mVideos = videos;
+
+        // Remove all existing videos (everything but first two children)
+        for (int i = mVideosGroup.getChildCount() - 1; i >= 2; i--) {
+            mVideosGroup.removeViewAt(i);
+        }
+
+        final LayoutInflater inflater = LayoutInflater.from(MovieDetailActivity.this);
+
+        boolean hasVideos = false;
+        if (!videos.isEmpty()) {
+            for (Video video : mVideos)
+                if (video.getType().equals(Video.TYPE_TRAILER)) {
+                    Timber.d("Found trailer!");
+                    mTrailer = video;
+
+                    mCoverContainer.setTag(video);
+                    mCoverContainer.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            mHelpers.playVideo((Video) view.getTag());
+                        }
+                    });
+                    break;
+                }
+
+            for (Video video : videos) {
+                final View videoView = inflater.inflate(R.layout.item_video, mVideosGroup, false);
+                final TextView videoNameView = findById(videoView, R.id.video_name);
+
+                videoNameView.setText(video.getSite() + ": " + video.getName());
+                videoView.setTag(video);
+                videoView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mHelpers.playVideo((Video) v.getTag());
+                    }
+                });
+
+                mVideosGroup.addView(videoView);
+                hasVideos = true;
+            }
+        }
+
+        showShareMenuItemDeferred(mTrailer != null);
+        mCoverContainer.setClickable(mTrailer != null);
+        mPosterPlayImage.setVisibility(mTrailer != null ? View.VISIBLE : View.GONE);
+        mVideosGroup.setVisibility(hasVideos ? View.VISIBLE : View.GONE);
+    }
+
+    private void showShareMenuItemDeferred(final boolean visible) {
+        mDeferredUiOperations.add(new Runnable() {
+            @Override
+            public void run() {
+                mMenuItemShare.setVisible(visible);
+            }
+        });
+        tryExecuteDeferredUiOperations();
+    }
+
+    private void tryExecuteDeferredUiOperations() {
+        if (mMenuItemShare != null) {
+            for (Runnable r : mDeferredUiOperations) {
+                r.run();
+            }
+            mDeferredUiOperations.clear();
+        }
     }
 
     @Override
@@ -310,10 +414,14 @@ public class MovieDetailActivity extends AppCompatActivity implements Observable
 
     }
 
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
+        getMenuInflater().inflate(R.menu.movie_detail, menu);
+        mMenuItemShare = menu.findItem(R.id.menu_share);
+        tryExecuteDeferredUiOperations();
         return true;
     }
 
