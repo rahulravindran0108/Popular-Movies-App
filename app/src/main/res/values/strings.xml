@@ -48,4 +48,6 @@
     <string name="placeholder_movie_plot">Some plot</string>
 
     <string name="movie_overview_header">Overview</string>
+
+    <string name="movie_genre_header">Genres</string>
 </resources>

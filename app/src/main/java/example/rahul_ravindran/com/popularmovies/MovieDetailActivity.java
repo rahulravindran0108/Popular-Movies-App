@@ -40,6 +40,7 @@ import butterknife.BindColor;
 import butterknife.ButterKnife;
 import example.rahul_ravindran.com.popularmovies.adapters.GridViewImageAdapter;
 import example.rahul_ravindran.com.popularmovies.api.MoviesAPI;
+import example.rahul_ravindran.com.popularmovies.helpers.MovieHelpers;
 import example.rahul_ravindran.com.popularmovies.model.Genres;
 import example.rahul_ravindran.com.popularmovies.model.MovieReview;
 import example.rahul_ravindran.com.popularmovies.repositories.MoviesRepoImpl;
@@ -87,12 +88,14 @@ public class MovieDetailActivity extends AppCompatActivity implements Observable
     RatingBar movieRatingBar;
     @Bind(R.id.movie_reviews_container)
     ViewGroup mReviewsGroup;
+    @Bind(R.id.movie_genres_container)
+    ViewGroup mGenresGroup;
     @BindColor(R.color.theme_primary)
     int mColorThemePrimary;
     @BindColor(R.color.body_text_white)
     int mColorTextWhite;
-    @Bind(R.id.movie_genre)
-    TextView mMovieGenres;
+//    @Bind(R.id.movie_genre)
+//    TextView mMovieGenres;
 
 
     private String baseImageUrl = "http://image.tmdb.org/t/p/w342/";
@@ -102,6 +105,7 @@ public class MovieDetailActivity extends AppCompatActivity implements Observable
     private List<MovieReview> mReviews;
 
     private List<Genres> mGenres;
+    private MovieHelpers mHelpers;
 
 
     @Inject
@@ -115,7 +119,7 @@ public class MovieDetailActivity extends AppCompatActivity implements Observable
         setContentView(R.layout.movie_detail);
         ButterKnife.bind(this);
         ((PopularMoviesApp) getApplication()).getDataProviderComponent().inject(this);
-
+        mHelpers = new MovieHelpers(getApplicationContext());
         setSupportActionBar(mToolbar);
 
         mSubscriptions = new CompositeSubscription();
@@ -225,14 +229,29 @@ public class MovieDetailActivity extends AppCompatActivity implements Observable
     private void onGenresLoaded(List<Genres> genres) {
         mGenres = genres;
         List<Integer> movieGenreID = mMovie.getGenreIds();
-        List<String> outputString = new ArrayList<String>();
 
-        for(Genres genre : genres) {
-            if(movieGenreID.contains((int) genre.getId()))
-                outputString.add(genre.getName());
+
+        final LayoutInflater inflater = LayoutInflater.from(MovieDetailActivity.this);
+        boolean hasGenres = false;
+
+        if(!genres.isEmpty()) {
+            for(int genreId : movieGenreID) {
+
+                final View genreView = inflater.inflate(R.layout.movie_genre_detail,
+                        mReviewsGroup, false);
+
+                final ImageView genreImageView = findById(genreView, R.id.movie_genre_icon);
+
+                genreImageView.setImageDrawable(mHelpers.providesDrawable(genreId));
+
+                mGenresGroup.addView(genreView);
+                hasGenres = true;
+
+            }
         }
 
-        mMovieGenres.setText(Arrays.toString(outputString.toArray()));
+        mGenresGroup.setVisibility(hasGenres ? View.VISIBLE : View.GONE);
+
     }
 
     private void onReviewsLoaded(List<MovieReview> reviews) {
