@@ -13,7 +13,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <example.rahul_ravindran.com.popularmovies.ui.ResizableImageView
+        <example.rahul_ravindran.com.popularmovies.ui.widgets.ResizableImageView
             android:id="@+id/movie_item_image"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

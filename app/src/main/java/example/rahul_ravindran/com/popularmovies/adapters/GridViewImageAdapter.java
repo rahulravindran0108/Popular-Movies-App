@@ -13,7 +13,7 @@ import com.squareup.picasso.Picasso;
 import java.util.List;
 
 import example.rahul_ravindran.com.popularmovies.MovieDB;
-import example.rahul_ravindran.com.popularmovies.ui.ResizableImageView;
+import example.rahul_ravindran.com.popularmovies.ui.widgets.ResizableImageView;
 
 /**
  * Created by rahulravindran on 15/12/15.

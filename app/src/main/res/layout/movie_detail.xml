@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.github.ksoichiro.android.observablescrollview.ObservableScrollView
-    android:id="@+id/movie_scroll_view"
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/movie_scroll_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_marginEnd="@dimen/movie_details_margin"
     android:layout_marginRight="@dimen/movie_details_margin"
     android:fillViewport="true">
-
 
 
     <RelativeLayout
@@ -24,10 +23,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/movie_details_margin"
-            android:clickable="true"
-            >
+            android:clickable="true">
 
-            <example.rahul_ravindran.com.popularmovies.ui.ResizableImageView
+            <example.rahul_ravindran.com.popularmovies.ui.widgets.ResizableImageView
                 android:id="@+id/movie_cover"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
@@ -72,7 +70,7 @@
                 android:layout_marginTop="@dimen/activity_vertical_margin"
                 android:clipChildren="false">
 
-                <example.rahul_ravindran.com.popularmovies.ui.ResizableImageView
+                <example.rahul_ravindran.com.popularmovies.ui.widgets.ResizableImageView
                     android:id="@+id/movie_poster"
                     android:layout_width="@dimen/movie_details_poster_width_small"
                     android:layout_height="match_parent"
@@ -83,18 +81,18 @@
                     android:contentDescription="@null"
                     app:imageAspectRatio="@dimen/movie_item_image_aspect_ratio"
 
-                    tools:src="@drawable/placeholder_movie_item_image"  />
+                    tools:src="@drawable/placeholder_movie_item_image" />
 
                 <!--<ImageButton-->
-                    <!--android:id="@+id/movie_favorite_button"-->
-                    <!--style="@style/FavoriteButton"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_alignParentEnd="true"-->
-                    <!--android:layout_alignParentRight="true"-->
-                    <!--android:layout_alignParentTop="true"-->
-                    <!--android:contentDescription="@string/movie_item_btn_favorite_desc"-->
-                    <!--android:tint="@color/theme_primary" />-->
+                <!--android:id="@+id/movie_favorite_button"-->
+                <!--style="@style/FavoriteButton"-->
+                <!--android:layout_width="wrap_content"-->
+                <!--android:layout_height="wrap_content"-->
+                <!--android:layout_alignParentEnd="true"-->
+                <!--android:layout_alignParentRight="true"-->
+                <!--android:layout_alignParentTop="true"-->
+                <!--android:contentDescription="@string/movie_item_btn_favorite_desc"-->
+                <!--android:tint="@color/theme_primary" />-->
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -116,13 +114,13 @@
                         tools:text="Jurassic Park" />
 
                     <!--<TextView-->
-                        <!--android:id="@+id/movie_genre"-->
-                        <!--android:layout_width="match_parent"-->
-                        <!--android:layout_height="wrap_content"-->
-                        <!--android:textSize="14sp"-->
-                        <!--android:textColor="@color/body_text_1"-->
-                        <!--android:text="genres"-->
-                        <!--/>-->
+                    <!--android:id="@+id/movie_genre"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:textSize="14sp"-->
+                    <!--android:textColor="@color/body_text_1"-->
+                    <!--android:text="genres"-->
+                    <!--/>-->
 
                     <include layout="@layout/partial_genres" />
 
@@ -136,12 +134,11 @@
 
                     <RatingBar
                         android:id="@+id/ratingBars"
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:isIndicator="true"
                         style="?android:attr/ratingBarStyleSmall"
-                        android:stepSize="0.25"
-                        />
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:isIndicator="true"
+                        android:stepSize="0.25" />
 
 
                     <TextView
@@ -156,7 +153,147 @@
 
             </RelativeLayout>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/list_dropdown_divider_color" />
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+                    <ImageView
+                        android:id="@+id/movie_votes"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:src="@drawable/ic_movies_vote_count" />
+
+                    <TextView
+                        android:id="@+id/drawable_movies_vote_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/movie_votes"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerInParent="true"
+                        android:gravity="center"
+                        android:text="8.8"
+                        android:textColor="#000000" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/movie_votes"
+                        android:layout_marginTop="16dp"
+                        android:layout_centerHorizontal="true"
+
+                        android:gravity="center"
+                        android:text="Vote Count" />
+
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+                    <ImageView
+                        android:id="@+id/movie_ratings_logo"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:src="@drawable/ic_movies_vote" />
+
+
+                    <TextView
+                        android:id="@+id/drawable_movies_rating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/movie_ratings_logo"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerInParent="true"
+                        android:gravity="center"
+                        android:text="8.8"
+                        android:textColor="#ffffff" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/movie_ratings_logo"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center"
+                        android:text="Average Rating" />
+
+                </RelativeLayout>
+
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+                    <ImageView
+                        android:id="@+id/movie_popularity"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:src="@drawable/ic_popular_movies" />
+
+                    <TextView
+                        android:id="@+id/drawable_movies_popularity"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/movie_popularity"
+                        android:layout_centerHorizontal="true"
+                        android:layout_centerInParent="true"
+                        android:gravity="center"
+                        android:text="8.8"
+                        android:textColor="#ffffff" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/movie_popularity"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="16dp"
+                        android:gravity="center"
+                        android:text="Popularity" />
+
+                </RelativeLayout>
+
+
+                <RelativeLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+
+                    <ImageView
+                        android:id="@+id/movie_similar"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerInParent="true"
+                        android:src="@drawable/ic_movies_similar" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/movie_similar"
+                        android:layout_centerHorizontal="true"
+                        android:gravity="center"
+                        android:layout_marginTop="16dp"
+                        android:text="Similar" />
+                </RelativeLayout>
+
+
+            </LinearLayout>
 
 
             <View
@@ -174,8 +311,8 @@
                 android:layout_marginTop="@dimen/element_spacing_normal"
                 android:clickable="true"
                 android:focusable="true"
-                android:textAlignment="center"
-                android:text="@string/movie_overview_header" />
+                android:text="@string/movie_overview_header"
+                android:textAlignment="center" />
 
             <TextView
                 android:id="@+id/movie_overview"

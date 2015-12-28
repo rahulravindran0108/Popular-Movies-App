@@ -11,7 +11,7 @@
         android:theme="@style/AppTheme" >
 
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.activity.MoviesBrowserActivity"
             android:label="@string/app_name"
             android:theme="@style/Theme.PopularMovies" >
             <intent-filter>
@@ -21,8 +21,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".MovieDetailActivity"
-            android:parentActivityName=".MainActivity"
+            android:name=".ui.activity.MovieDetailActivity"
+            android:parentActivityName=".ui.activity.MoviesBrowserActivity"
             android:theme="@style/Theme.PopularMovies.MovieDetails"
         />
     </application>

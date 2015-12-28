@@ -3,10 +3,11 @@ package example.rahul_ravindran.com.popularmovies.component;
 import javax.inject.Singleton;
 
 import dagger.Component;
-import example.rahul_ravindran.com.popularmovies.MainActivity;
-import example.rahul_ravindran.com.popularmovies.MovieDetailActivity;
+
 import example.rahul_ravindran.com.popularmovies.api.APIModule;
 import example.rahul_ravindran.com.popularmovies.api.DataProviderModule;
+import example.rahul_ravindran.com.popularmovies.ui.fragments.BrowseSortedMoviesFragment;
+import example.rahul_ravindran.com.popularmovies.ui.fragments.DetailedMovieFragment;
 
 /**
  * Created by rahulravindran on 26/12/15.
@@ -14,6 +15,6 @@ import example.rahul_ravindran.com.popularmovies.api.DataProviderModule;
 @Singleton
 @Component(modules={APIModule.class, DataProviderModule.class})
 public interface DataProviderComponent {
-    void inject(MainActivity activity);
-    void inject(MovieDetailActivity activity);
+    void inject(BrowseSortedMoviesFragment fragment);
+    void inject(DetailedMovieFragment fragment);
 }

@@ -1,4 +1,4 @@
-package example.rahul_ravindran.com.popularmovies.ui;
+package example.rahul_ravindran.com.popularmovies.ui.widgets;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -45,10 +45,10 @@ public final class ResizableImageView extends ImageView{
             int lockedWidth = MeasureSpec.getSize(widthSpec);
             int lockedHeight = MeasureSpec.getSize(heightSpec);
 
-            if (lockedWidth == 0 && lockedHeight == 0) {
-                throw new IllegalArgumentException(
-                        "Both width and height cannot be zero -- watch out for scrollable containers");
-            }
+//            if (lockedWidth == 0 && lockedHeight == 0) {
+//                throw new IllegalArgumentException(
+//                        "Both width and height cannot be zero -- watch out for scrollable containers");
+//            }
 
             // Get the padding of the border background.
             int hPadding = getPaddingLeft() + getPaddingRight();

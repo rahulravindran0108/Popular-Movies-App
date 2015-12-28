@@ -1,4 +1,4 @@
-package example.rahul_ravindran.com.popularmovies.ui;
+package example.rahul_ravindran.com.popularmovies.ui.widgets;
 
 import android.content.Context;
 import android.util.AttributeSet;

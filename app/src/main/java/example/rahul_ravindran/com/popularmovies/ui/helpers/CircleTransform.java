@@ -1,4 +1,4 @@
-package example.rahul_ravindran.com.popularmovies.ui;
+package example.rahul_ravindran.com.popularmovies.ui.helpers;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
