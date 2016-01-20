@@ -11,6 +11,7 @@ import example.rahul_ravindran.com.popularmovies.api.APIModule;
 import example.rahul_ravindran.com.popularmovies.api.DataProviderModule;
 import example.rahul_ravindran.com.popularmovies.component.DataProviderComponent;
 import example.rahul_ravindran.com.popularmovies.component.DaggerDataProviderComponent;
+import example.rahul_ravindran.com.popularmovies.provider.MoviesProviderModule;
 import timber.log.Timber;
 
 /**
@@ -49,6 +50,7 @@ public class PopularMoviesApp extends Application {
         dataProviderComponent = DaggerDataProviderComponent.builder()
                 .dataProviderModule(new DataProviderModule())
                 .aPIModule(new APIModule())
+                .moviesProviderModule(new MoviesProviderModule(this))
                 .build();
     }
 

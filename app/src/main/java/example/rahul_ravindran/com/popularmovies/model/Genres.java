@@ -2,22 +2,25 @@ package example.rahul_ravindran.com.popularmovies.model;
 
 import android.os.Parcel;
 import android.os.Parcelable;
-
 import com.google.gson.annotations.Expose;
 
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by rahulravindran on 26/12/15.
- */
-public class Genres implements Parcelable{
+import example.rahul_ravindran.com.popularmovies.provider.Metadata.GenresMetadata;
+
+public class Genres implements Parcelable, GenresMetadata {
 
     @Expose
     long id;
 
     @Expose
     String name;
+
+    public Genres(int id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 
     public long getId() {
         return id;

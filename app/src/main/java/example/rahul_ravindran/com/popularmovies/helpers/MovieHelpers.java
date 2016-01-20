@@ -6,8 +6,16 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 
+import java.util.List;
+
+import example.rahul_ravindran.com.popularmovies.MovieDB;
 import example.rahul_ravindran.com.popularmovies.R;
+import example.rahul_ravindran.com.popularmovies.model.Genres;
 import example.rahul_ravindran.com.popularmovies.model.Video;
+import example.rahul_ravindran.com.popularmovies.repositories.MoviesRepoImpl;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.subjects.PublishSubject;
 import timber.log.Timber;
 
 /**
@@ -17,9 +25,12 @@ public class MovieHelpers {
 
     Context mContext;
     Drawable mCurrentDrawable;
+    private static final PublishSubject<FavoredEvent> FAVORED_SUBJECT = PublishSubject.create();
+    private final MoviesRepoImpl mRepository;
 
-    public MovieHelpers(Context c) {
+    public MovieHelpers(Context c, MoviesRepoImpl mRepository) {
         this.mContext = c;
+        this.mRepository = mRepository;
     }
 
     public void playVideo(Video video) {
@@ -31,6 +42,59 @@ public class MovieHelpers {
 
         else
             Timber.w("Unsupported video format");
+    }
+
+
+    public void setMovieFavored(MovieDB movie, boolean favored) {
+        movie.setFavored(favored);
+        if (favored) {
+            mRepository.saveMovie(movie);
+            mRepository.savedMovies()
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Action1<List<MovieDB>>() {
+                        @Override
+                        public void call(List<MovieDB> movies) {
+                            Timber.d(String.format("Favored movies loaded, %d items", movies.size()));
+                        }
+                    }, new Action1<Throwable>() {
+                        @Override
+                        public void call(Throwable throwable) {
+                            Timber.e(throwable, "Favored movies loading failed");
+
+                        }
+                    });
+        }
+        FAVORED_SUBJECT.onNext(new FavoredEvent(movie.getId(), favored));
+    }
+
+    public void setMovieGenres(List<Genres> genres) {
+        for (Genres genre : genres) {
+            mRepository.saveGenre(genre);
+        }
+
+        mRepository.savedGenres()
+                .observeOn(AndroidSchedulers.mainThread())
+
+                .subscribe(new Action1<List<Genres>>() {
+                    @Override
+                    public void call(List<Genres> genres) {
+                        Timber.d(String.format("genres loaded, %d items", genres.size()));
+                        getGenres(genres);
+                    }
+
+
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Timber.e(throwable, "genres loading failed");
+
+                    }
+                });
+
+    }
+
+    public void getGenres(List<Genres> genres) {
+
     }
 
     public Drawable providesDrawable(int id) {
@@ -98,5 +162,15 @@ public class MovieHelpers {
         }
 
         return mCurrentDrawable;
+    }
+
+    public static class FavoredEvent {
+        public long movieId;
+        public boolean favored;
+
+        private FavoredEvent(long movieId, boolean favored) {
+            this.movieId = movieId;
+            this.favored = favored;
+        }
     }
 }

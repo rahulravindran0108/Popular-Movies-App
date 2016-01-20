@@ -2,17 +2,22 @@ package example.rahul_ravindran.com.popularmovies;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
+import com.google.common.collect.Lists;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 import java.util.List;
 
+
+import example.rahul_ravindran.com.popularmovies.provider.Metadata.MoviesMetadata;
+
 /**
  * Created by rahulravindran on 06/12/15.
  */
-public class MovieDB implements Parcelable {
+public class MovieDB implements Parcelable, MoviesMetadata {
 
     @Expose
     long id;
@@ -50,20 +55,34 @@ public class MovieDB implements Parcelable {
     @Expose
     double popularity;
 
+    boolean favored = false;
+
+
+    public boolean isFavored() {
+        return favored;
+    }
+
+    public MovieDB setFavored(boolean favored) {
+        this.favored = favored;
+        return this;
+    }
+
     public double getPopularity() {
         return popularity;
     }
 
-    public void setPopularity(double popularity) {
+    public MovieDB setPopularity(double popularity) {
         this.popularity = popularity;
+        return this;
     }
 
     public long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public MovieDB setId(long id) {
         this.id = id;
+        return this;
     }
 
     public List<Integer> getGenreIds() {
@@ -78,8 +97,9 @@ public class MovieDB implements Parcelable {
         return backdropPath;
     }
 
-    public void setBackdropPath(String backdropPath) {
+    public MovieDB setBackdropPath(String backdropPath) {
         this.backdropPath = backdropPath;
+        return this;
     }
 
     public String getOriginalLanguage() {
@@ -94,8 +114,9 @@ public class MovieDB implements Parcelable {
         return overview;
     }
 
-    public void setOverview(String overview) {
+    public MovieDB setOverview(String overview) {
         this.overview = overview;
+        return this;
     }
 
     public String getOriginalTitle() {
@@ -110,40 +131,70 @@ public class MovieDB implements Parcelable {
         return posterPath;
     }
 
-    public void setPosterPath(String posterPath) {
+    public MovieDB setPosterPath(String posterPath) {
         this.posterPath = posterPath;
+        return this;
     }
 
     public String getTitle() {
         return title;
     }
 
-    public void setTitle(String title) {
+    public MovieDB setTitle(String title) {
         this.title = title;
+        return this;
     }
 
     public double getVoteAverage() {
         return voteAverage;
     }
 
-    public void setVoteAverage(double voteAverage) {
+
+    public String makeGenreIdsList() {
+        if (genreIds.isEmpty()) {
+            return "";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(genreIds.get(0));
+        for (int i = 1; i < genreIds.size(); i++) {
+            sb.append(",").append(genreIds.get(i));
+        }
+        return sb.toString();
+    }
+
+
+    public MovieDB putGenreIdsList(String ids) {
+        if (!TextUtils.isEmpty(ids)) {
+            genreIds = new ArrayList<>();
+            String[] strs = ids.split(",");
+            for (String s : strs)
+                genreIds.add(Integer.parseInt(s));
+        }
+        return this;
+    }
+
+    public MovieDB setVoteAverage(double voteAverage) {
         this.voteAverage = voteAverage;
+        return this;
     }
 
     public long getVoteCount() {
         return voteCount;
     }
 
-    public void setVoteCount(long voteCount) {
+    public MovieDB setVoteCount(long voteCount) {
         this.voteCount = voteCount;
+        return this;
     }
 
     public String getReleaseDate() {
         return releaseDate;
     }
 
-    public void setReleaseDate(String releaseDate) {
+    public MovieDB setReleaseDate(String releaseDate) {
         this.releaseDate = releaseDate;
+        return this;
     }
 
     public static final class Response {
@@ -178,9 +229,10 @@ public class MovieDB implements Parcelable {
         dest.writeString(this.title);
         dest.writeDouble(this.voteAverage);
         dest.writeLong(this.voteCount);
+        dest.writeByte(favored ? (byte) 1 : (byte) 0);
     }
 
-    protected MovieDB(Parcel in) {
+    public MovieDB(Parcel in) {
         this.id = in.readLong();
         this.genreIds = new ArrayList<Integer>();
         in.readList(this.genreIds, List.class.getClassLoader());
@@ -192,6 +244,7 @@ public class MovieDB implements Parcelable {
         this.title = in.readString();
         this.voteAverage = in.readDouble();
         this.voteCount = in.readLong();
+        this.favored = in.readByte() != 0;
     }
 
     public static final Creator<MovieDB> CREATOR = new Creator<MovieDB>() {
@@ -199,4 +252,8 @@ public class MovieDB implements Parcelable {
 
         public MovieDB[] newArray(int size) {return new MovieDB[size];}
     };
+
+    public MovieDB() {
+
+    }
 }

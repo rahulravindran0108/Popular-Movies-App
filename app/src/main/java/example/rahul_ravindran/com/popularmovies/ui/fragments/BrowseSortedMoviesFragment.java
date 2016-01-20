@@ -1,10 +1,13 @@
 package example.rahul_ravindran.com.popularmovies.ui.fragments;
 
+import android.content.ContentResolver;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.GridLayoutManager;
 import android.util.Log;
 import android.view.View;
+
+import com.squareup.sqlbrite.BriteContentResolver;
 
 import java.util.List;
 
@@ -44,6 +47,12 @@ public class BrowseSortedMoviesFragment extends BrowseMoviesFragment implements 
     @Inject
     MoviesAPI apiService;
 
+    @Inject
+    ContentResolver mContentResolver;
+
+    @Inject
+    BriteContentResolver mBriteContentResolver;
+
     public static BrowseSortedMoviesFragment newInstance(@NonNull Sort sort) {
         Bundle args = new Bundle();
 
@@ -66,7 +75,7 @@ public class BrowseSortedMoviesFragment extends BrowseMoviesFragment implements 
             mIsLoading = savedInstanceState.getBoolean(STATE_IS_LOADING, true);
             Timber.d(String.format("Restoring state: pages 1-%d, was loading - %s", mCurrentPage, mIsLoading));
         }
-        mMoviesRepository = new MoviesRepoImpl(apiService);
+        mMoviesRepository = new MoviesRepoImpl(apiService, mContentResolver, mBriteContentResolver);
         newAdapter.setLoadMore(true);
         mViewAnimator.setDisplayedChildId((mCurrentPage == 0) ? ANIMATOR_VIEW_LOADING : ANIMATOR_VIEW_CONTENT);
     }

@@ -22,6 +22,7 @@ import example.rahul_ravindran.com.popularmovies.api.Sort;
 import example.rahul_ravindran.com.popularmovies.ui.fragments.BrowseMoviesFragment;
 import example.rahul_ravindran.com.popularmovies.ui.fragments.BrowseSortedMoviesFragment;
 import example.rahul_ravindran.com.popularmovies.ui.fragments.DetailedMovieFragment;
+import example.rahul_ravindran.com.popularmovies.ui.fragments.FavoredMoviesFragment;
 import timber.log.Timber;
 
 /**
@@ -63,6 +64,7 @@ public class MoviesBrowserActivity extends BaseTemplateActivity implements Brows
         mSpinnerAdapter.addItem(Sort.popularity.toString(), getString(R.string.mode_sort_popularity), false);
         mSpinnerAdapter.addItem(Sort.vote_count.toString(), getString(R.string.mode_sort_vote_count), false);
         mSpinnerAdapter.addItem(Sort.vote_average.toString(), getString(R.string.mode_sort_vote_average), false);
+        mSpinnerAdapter.addItem("Favorites", "Favorite Movies",false);
 
         int itemToSelect = -1;
 
@@ -72,6 +74,8 @@ public class MoviesBrowserActivity extends BaseTemplateActivity implements Brows
             itemToSelect = 1;
         else if (mMode.equals(Sort.vote_average.toString()))
             itemToSelect = 2;
+        else if(mMode.equals("Favorite Movies"))
+            itemToSelect = 3;
         else
             itemToSelect = 0;
 
@@ -95,12 +99,17 @@ public class MoviesBrowserActivity extends BaseTemplateActivity implements Brows
     }
 
     private void onModeSelected(String mode) {
-        if(mode == null || mode == "")
+        if(mode == null || mode.equals(""))
             mMode = Sort.popularity.toString();
         else
             mMode = mode;
+        Log.i("Popular Movies Mode:",mMode);
+        if(mMode.equals("Favorites"))
+            replaceMoviesFragment(new FavoredMoviesFragment());
+        else
+            replaceMoviesFragment(BrowseSortedMoviesFragment.newInstance(Sort.fromString(mMode)));
 
-        replaceMoviesFragment(BrowseSortedMoviesFragment.newInstance(Sort.fromString(mMode)));
+
 
 //        if (mMode.equals(MODE_FAVORITES))
 //            replaceMoviesFragment(new FavoredMoviesFragment());

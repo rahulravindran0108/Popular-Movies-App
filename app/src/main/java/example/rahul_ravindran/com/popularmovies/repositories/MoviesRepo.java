@@ -1,6 +1,7 @@
 package example.rahul_ravindran.com.popularmovies.repositories;
 
 import java.util.List;
+import java.util.Map;
 
 import example.rahul_ravindran.com.popularmovies.MovieDB;
 import example.rahul_ravindran.com.popularmovies.api.Sort;
@@ -21,4 +22,12 @@ public interface MoviesRepo {
     Observable<List<Genres>> getListOfGenres();
 
     Observable<List<Video>> videos(long movieId);
+
+    void saveMovie(MovieDB movie);
+
+    Observable<List<MovieDB>> savedMovies();
+
+    void saveGenre(Genres genre);
+
+    Observable<List<Genres>> savedGenres();
 }

@@ -1,7 +1,7 @@
 package example.rahul_ravindran.com.popularmovies.ui.fragments;
 
+import android.content.ContentResolver;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewCompat;
 import android.support.v7.widget.Toolbar;
@@ -14,6 +14,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -23,6 +24,7 @@ import com.github.ksoichiro.android.observablescrollview.ObservableScrollViewCal
 import com.github.ksoichiro.android.observablescrollview.ScrollState;
 import com.github.ksoichiro.android.observablescrollview.ScrollUtils;
 import com.squareup.picasso.Picasso;
+import com.squareup.sqlbrite.BriteContentResolver;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -32,6 +34,7 @@ import javax.inject.Inject;
 
 import butterknife.Bind;
 import butterknife.BindColor;
+import butterknife.OnClick;
 import example.rahul_ravindran.com.popularmovies.MovieDB;
 
 import example.rahul_ravindran.com.popularmovies.PopularMoviesApp;
@@ -69,7 +72,6 @@ public class DetailedMovieFragment extends BaseFragment implements ObservableScr
     ObservableScrollView mScrollView;
     @Bind(R.id.movie_cover_container)
     FrameLayout mCoverContainer;
-
     @Bind(R.id.movie_cover)
     ResizableImageView coverImageView;
     @Bind(R.id.movie_poster)
@@ -121,6 +123,13 @@ public class DetailedMovieFragment extends BaseFragment implements ObservableScr
     @Inject
     MoviesAPI mApiService;
 
+    @Inject
+    ContentResolver mContentResolver;
+
+    @Inject
+    BriteContentResolver mBriteContentResolver;
+
+
     public static DetailedMovieFragment newInstance(MovieDB movie) {
         Bundle args = new Bundle();
         args.putParcelable(ARG_MOVIE, movie);
@@ -149,12 +158,22 @@ public class DetailedMovieFragment extends BaseFragment implements ObservableScr
         }
     }
 
+    @OnClick(R.id.movie_favorite_button)
+    public void onFavored(ImageButton button) {
+        if (mMovie == null) return;
+
+        boolean favored = !mMovie.isFavored();
+        button.setSelected(favored);
+        mHelpers.setMovieFavored(mMovie, favored);
+        if (favored) showToast(R.string.message_movie_favored);
+    }
+
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         mSubscriptions = new CompositeSubscription();
-        mMoviesRepository = new MoviesRepoImpl(mApiService);
-        mHelpers = new MovieHelpers(getContext());
+        mMoviesRepository = new MoviesRepoImpl(mApiService, mContentResolver, mBriteContentResolver);
+        mHelpers = new MovieHelpers(getContext(), mMoviesRepository);
         onScrollChanged(mScrollView.getCurrentScrollY(), false, false);
 
         onMovieLoaded((MovieDB) getArguments().getParcelable(ARG_MOVIE));
@@ -354,6 +373,8 @@ public class DetailedMovieFragment extends BaseFragment implements ObservableScr
     }
 
     private void onGenresLoaded(List<Genres> genres) {
+        //set movie genres
+        mHelpers.setMovieGenres(genres);
         mGenres = genres;
         List<Integer> movieGenreID = mMovie.getGenreIds();
 
